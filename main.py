@@ -22,6 +22,7 @@ class AlienInvasion:
 
         self.ship = Ship(self)
         self.aliens = []
+
         self.ship_bullets = []
         self.alien_bullets = []
 
@@ -64,22 +65,21 @@ class AlienInvasion:
         if event.key == pygame.K_d: self.ship.moving["right"] = False
 
     def _check_ship_hit(self):
-        for alien in self.aliens:
-            for bullet in alien.bullets[:]:
-                if self.ship.rect.colliderect(bullet.rect):
-                    print("Попал")
+        for bullet in self.alien_bullets[:]:
+            if self.ship.rect.colliderect(bullet.rect):
+                print("Попал")
 
-                    alien.bullets.remove(bullet)
+                self.alien_bullets.remove(bullet)
 
     def _check_alien_hit(self):
-        for aline in self.aliens[:]:
+        for alien in self.aliens[:]:
             for bullet in self.ship_bullets[:]:
-                if bullet.rect.colliderect(aline.rect):
+                if bullet.rect.colliderect(alien.rect):
                     print("Поподание в пришельца")
 
                     self.ship_bullets.remove(bullet)
-                    if aline in self.aliens:
-                        self.aliens.remove(aline)
+                    if alien in self.aliens:
+                        self.aliens.remove(alien)
 
     def _create_fleet(self):
         alien = Alien(self)
@@ -109,17 +109,16 @@ class AlienInvasion:
 
         for alien in self.aliens:
             if random() <= 0.33:
-                alien.bullets.append(AlineBullet(alien))
+                self.alien_bullets.append(AlineBullet(alien))
 
             self.last_alien_shot = pygame.time.get_ticks()
 
     def _alien_draw_bullet(self):
-        for alien in self.aliens:
-            for bullet in alien.bullets[:]:
-                bullet.draw_bullet()
+        for bullet in self.alien_bullets[:]:
+            bullet.draw_bullet()
 
-                if bullet.rect.y > self.setting.height:
-                    alien.bullets.remove(bullet)
+            if bullet.rect.y > self.setting.height:
+                self.alien_bullets.remove(bullet)
 
     def _update_screen(self):
         self.screen.fill(self.setting.bg_color)

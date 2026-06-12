@@ -17,14 +17,10 @@ class AlineBullet:
         self.rect.y += self.bullet_speed
         self.screen.blit(self.image, self.rect)
 
-
-
 class Alien:
     def __init__(self, game):
         self.screen = game.screen
         self.screen_rect = self.screen.get_rect()
-
-        self.bullets = []
 
         self.image = pygame.image.load("Images/pshin.png")
         self.image = pygame.transform.scale(self.image, (100, 100))
