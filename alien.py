@@ -25,7 +25,9 @@ class Alien:
         self.image = pygame.image.load("Images/pshin.png")
         self.image = pygame.transform.scale(self.image, (100, 100))
         self.rect = self.image.get_rect()
+        self.rect.y = -200
 
-    def blit_alien(self):
+    def blit_alien(self):      
+        self.rect.y += 1.5
         self.screen.blit(self.image, self.rect)
 

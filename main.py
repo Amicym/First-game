@@ -5,7 +5,7 @@ from alien import Alien, AlineBullet
 
 import pygame
 import sys
-from random import random
+from random import random, randrange
 
 class AlienInvasion:
     def __init__(self, height: int, width: int, fps: int, bg_color: tuple, ship_speed: int, bullets_speed: int):
@@ -22,11 +22,15 @@ class AlienInvasion:
 
         self.ship = Ship(self)
         self.aliens = []
+        self.alien_x = []
+
+        self.font = pygame.font.Font(None, 100)
+        self.text = self.font.render("Поражение", True, (255, 255, 255))
+        self.defeat = False
 
         self.ship_bullets = []
         self.alien_bullets = []
 
-        self._create_fleet()
         self.last_alien_shot = 0
 
         self.bg = pygame.image.load("Images/bg.png")
@@ -67,36 +71,30 @@ class AlienInvasion:
     def _check_ship_hit(self):
         for bullet in self.alien_bullets[:]:
             if self.ship.rect.colliderect(bullet.rect):
-                print("Попал")
-
+                self.defeat = True
                 self.alien_bullets.remove(bullet)
 
     def _check_alien_hit(self):
         for alien in self.aliens[:]:
             for bullet in self.ship_bullets[:]:
                 if bullet.rect.colliderect(alien.rect):
-                    print("Поподание в пришельца")
-
                     self.ship_bullets.remove(bullet)
+
                     if alien in self.aliens:
                         self.aliens.remove(alien)
 
-    def _create_fleet(self):
-        alien = Alien(self)
-        alien.rect.x += 70
-        self.aliens.append(alien)
-        alien_width = alien.rect.width
+    def _create_alien(self):
+        if pygame.time.get_ticks() - self.last_alien_shot < 1000:
+            return
 
-        current_x = alien_width * 1.25 + 70
-        while current_x < (self.setting.width - 1.25 * alien_width):
-            self._create_alien(current_x)
-            current_x += 1.25  * alien_width
+        for i in range(randrange(1, 10)):
+            alien = Alien(self)
+            alien.rect.x = randrange(200, self.setting.width - 200)
 
-    def _create_alien(self, x_pos):
-        alien = Alien(self)
-        alien.rect.x = x_pos
-        self.aliens.append(alien)
+            # self.alien_x.append(alien.rect.x)
+            self.aliens.append(alien)
 
+    
     def _fire_bullets(self):
         for bullet in self.ship_bullets[:]:
             bullet.draw_bullet()
@@ -127,6 +125,10 @@ class AlienInvasion:
         self._fire_bullets()
         self.ship.blitme()
         self._alien_draw_bullet()
+
+        if self.defeat:
+            self.screen.blit(self.text, (self.setting.width / 3, self.setting.height / 2))
+
         if self.aliens:
             for alien in self.aliens:
                 alien.blit_alien()
@@ -135,12 +137,15 @@ class AlienInvasion:
 
     def run(self):
         while self.running:
-            self._check_events()
             self._update_screen()
-            self.ship.move()
-            self._check_ship_hit()
-            self._alien_fire_bullets()
-            self._check_alien_hit()
+            self._check_events()
+
+            if not self.defeat:
+                self._create_alien()
+                self.ship.move()
+                self._check_ship_hit()
+                self._alien_fire_bullets()
+                self._check_alien_hit()
 
             self.clock.tick(self.setting.fps)
 
