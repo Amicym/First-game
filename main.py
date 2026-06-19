@@ -32,6 +32,7 @@ class AlienInvasion:
         self.ship_bullets = []
         self.alien_bullets = []
 
+        self.last_alien_spawn = 0
         self.last_alien_shot = 0
 
         self.bg = pygame.image.load("Images/bg.png")
@@ -100,16 +101,18 @@ class AlienInvasion:
                 self.explosions.remove(explosion)
     
     def _create_alien(self):
-        if pygame.time.get_ticks() - self.last_alien_shot < 800:
+        if pygame.time.get_ticks() - self.last_alien_spawn < 800:
             return
 
         for _ in range(randrange(5, 10)):
             alien = Alien(self)
-            alien.rect.x = randrange(200, self.setting.width - 200)
+            alien.rect.x = randrange(-50, self.setting.width - 125)
 
             if not any(alien.rect.colliderect(a) for a in self.aliens):
                 self.aliens.append(alien)
-    
+        
+        self.last_alien_spawn = pygame.time.get_ticks()
+        
     def _fire_bullets(self):
         for bullet in self.ship_bullets[:]:
             bullet.draw_bullet()
@@ -172,12 +175,12 @@ class AlienInvasion:
 
 if __name__ == "__main__":
     game = AlienInvasion(
-        1000,
-        1150,
-        60,
-        (75, 15, 25),
-        10,
-        15
+        1900,           # Ширена
+        1150,           # Высота
+        60,             # FPS
+        (75, 15, 25),   # bg(Не нужен, может стоять любой)
+        10,             # Скорость коробля
+        15              # Скорость Пуль для коробля
     )
 
     game.run()

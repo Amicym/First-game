@@ -3,14 +3,20 @@ from random import randrange
 
 
 class Explosions:
+    _image_cache = None
+    
     def __init__(self, game, x, y):
         self.screen = game.screen
-        self.images = []
 
-        for i in range(1, 7):
-            image = pygame.image.load(f"Images/e_frame_{i}.png")
-            image = pygame.transform.scale(image, (200, 200))
-            self.images.append(image)
+        if Explosions._image_cache is None:
+            images = []
+            for i in range(1, 7):
+                image = pygame.image.load(f"Images/e_frame_{i}.png")
+                image = pygame.transform.scale(image, (200, 200))
+                images.append(image)
+            Explosions._image_cache = images
+        
+        self.images = Explosions._image_cache
         
         self.frame = 0
         self.animation_speed = 50

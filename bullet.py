@@ -1,14 +1,19 @@
 import pygame
 
 class Bullet:
+    _image_cache = None
+    
     def __init__(self, game, side):
         self.screen = game.screen
         self.ship_rect = game.ship.rect
 
-        self.image = pygame.image.load("Images/bullet.png")
-        # self.image = pygame.image.load("Images/donat.png")
-        self.image = pygame.transform.scale(self.image, (20, 35))
-
+        if Bullet._image_cache is None:
+            image = pygame.image.load("Images/bullet.png")
+            image = pygame.transform.scale(image, (20, 35))
+            Bullet._image_cache = image
+        
+        self.image = Bullet._image_cache
+            
         self.rect = self.image.get_rect()
         self.bullets_speed = game.setting.bullets_speed
 

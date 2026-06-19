@@ -4,18 +4,25 @@ from setting import Setting
 
 
 class Ship:
+    _image_cache = None
+
     def __init__(self, game):
         self.screen = game.screen
         self.screen_rect = self.screen.get_rect()
 
         self.setting = game.setting
 
-        self.images = []
-        for i in range(1, 5):
-            image = pygame.image.load(f"Images/ship_{i}.png")
-            image = pygame.transform.scale(image, (125, 125)) # Изменяет размер
-            self.images.append(image)
+        if Ship._image_cache is None:
+            images = []
+            for i in range(1, 5):
+                image = pygame.image.load(f"Images/ship_{i}.png")
+                image = pygame.transform.scale(image, (125, 125)) # Изменяет размер
+                images.append(image)
+            
+            Ship._image_cache = images
 
+        self.images = Ship._image_cache
+        
         self.rect = self.images[0].get_rect()
         self.rect.midbottom = self.screen_rect.midbottom
 
