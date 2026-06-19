@@ -14,8 +14,8 @@ class AlienInvasion:
         self.clock = pygame.time.Clock()
         self.setting = Setting(height, width, fps, bg_color, ship_speed, bullets_speed)
 
-        self.running = True
         self.screen = pygame.display.set_mode(self.setting.get_screen_setting())
+        self.screen_rect = self.screen.get_rect()
 
         # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         # self.setting.width = self.screen.get_rect().width - Полный экран
@@ -25,9 +25,16 @@ class AlienInvasion:
         self.aliens = []
         self.explosions = []
 
-        self.font = pygame.font.Font(None, 100)
-        self.text = self.font.render("Поражение", True, (255, 255, 255))
+        self.score = 0
+        self.font = pygame.font.Font("Font/TrueType (.ttf)/PixeloidMono.ttf", 200)
+        self.font_s = pygame.font.Font("Font/TrueType (.ttf)/PixeloidMono.ttf", 36)
+        
+        self.deafeat_text = self.font.render("game over".upper(), True, (255, 255, 255))
+        self.deafeat_text_rect = self.deafeat_text.get_rect()
+        self.deafeat_text_rect.center = self.screen_rect.center
+
         self.defeat = False
+        self.running = True
 
         self.ship_bullets = []
         self.alien_bullets = []
@@ -71,11 +78,25 @@ class AlienInvasion:
         if event.key == pygame.K_d: self.ship.moving["right"] = False
 
     def _check_ship_hit(self):
+        for alien in self.aliens:
+            if self.ship.rect.colliderect(alien):
+                self._create_explosions(self.ship.rect.x, self.ship.rect.y)
+                self.defeat = True
+                break
+
         for bullet in self.alien_bullets[:]:
             if self.ship.rect.colliderect(bullet.rect):
+                self._create_explosions(self.ship.rect.x, self.ship.rect.y)
                 self.defeat = True
                 self.alien_bullets.remove(bullet)
-
+                break
+    
+    def check_aliens_bottom(self):
+        for alien in self.aliens:
+            if alien.rect.y == self.setting.height:
+                self.defeat = True
+                break
+    
     def _check_alien_hit(self):
         for alien in self.aliens[:]:
             for bullet in self.ship_bullets[:]:
@@ -86,6 +107,7 @@ class AlienInvasion:
                         x = alien.rect.x
                         y = alien.rect.y
 
+                        self.score += alien.score_in_alien
                         self.aliens.remove(alien)
                         self._create_explosions(x, y)
     
@@ -106,7 +128,7 @@ class AlienInvasion:
 
         for _ in range(randrange(5, 10)):
             alien = Alien(self)
-            alien.rect.x = randrange(-50, self.setting.width - 125)
+            alien.rect.x = randrange(-50, self.setting.width - 150)
 
             if not any(alien.rect.colliderect(a) for a in self.aliens):
                 self.aliens.append(alien)
@@ -140,22 +162,44 @@ class AlienInvasion:
 
             if bullet.rect.y > self.setting.height:
                 self.alien_bullets.remove(bullet)
+   
+    def _check_defeat(self):
+        self._check_ship_hit()
+        self.check_aliens_bottom()
 
+
+    def _draw_defeat_screen(self):
+        if self.defeat:
+            self.screen.blit()
+
+    def _draw_text(self):
+        self.score_text = self.font_s.render(f"SCORE: {self.score}", False, (255, 255, 255))
+        self.score_text_rect = self.score_text.get_rect()
+        self.score_text_rect.topleft = self.screen_rect.topleft
+        
+        self.screen.blit(self.score_text, self.score_text_rect)
+
+        if self.defeat:
+            self.screen.blit(self.deafeat_text, self.deafeat_text_rect)
+        
+        
     def _update_screen(self):
-        self.screen.fill(self.setting.bg_color)
+        # self.screen.fill(self.setting.bg_color)
         self.screen.blit(self.bg)
 
-        self.ship.blitme()
+        self._draw_text()
         self._fire_bullets()
 
-        self._update_alien()
         self._alien_fire_bullets()
         self._alien_draw_bullet()
+        self._update_alien()
 
         self._update_explosions()
 
-        if self.defeat:
-            self.screen.blit(self.text, (self.setting.width / 3, self.setting.height / 2))
+        if not self.defeat:
+            self.ship.blitme()
+        else:
+            self.screen.blit(self.deafeat_text, self.deafeat_text_rect)
 
         pygame.display.flip()
 
@@ -163,11 +207,11 @@ class AlienInvasion:
         while self.running:
             self._update_screen()
             self._check_events()
+            self._create_alien()
 
             if not self.defeat:
-                self._create_alien()
                 self.ship.move()
-                self._check_ship_hit()
+                self._check_defeat()
                 self._alien_fire_bullets()
                 self._check_alien_hit()
 

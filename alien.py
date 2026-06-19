@@ -1,4 +1,5 @@
 import pygame
+import random
 
 
 class AlineBullet:
@@ -9,8 +10,8 @@ class AlineBullet:
         self.screen = alien.screen
 
         if AlineBullet._image_cache is None:
-            image = pygame.image.load("Images/donat.png")
-            image = pygame.transform.scale(image, (20, 20))
+            image = pygame.image.load("Images/alien_bullet.png")
+            image = pygame.transform.scale(image, (20, 50))
             AlineBullet._image_cache = image
     
         self.image = AlineBullet._image_cache        
@@ -28,6 +29,7 @@ class Alien:
     def __init__(self, game):
         self.screen = game.screen
         self.screen_rect = self.screen.get_rect()
+        self.score_in_alien = random.randrange(38, 43)
 
         if Alien._image_cache is None:
             image = pygame.image.load("Images/alien.png")
