@@ -2,6 +2,7 @@ from bullet import Bullet
 from ship import Ship
 from setting import Setting
 from alien import Alien, AlineBullet
+from explosions import Explosions
 
 import pygame
 import sys
@@ -22,7 +23,7 @@ class AlienInvasion:
 
         self.ship = Ship(self)
         self.aliens = []
-        self.alien_x = []
+        self.explosions = []
 
         self.font = pygame.font.Font(None, 100)
         self.text = self.font.render("Поражение", True, (255, 255, 255))
@@ -81,19 +82,33 @@ class AlienInvasion:
                     self.ship_bullets.remove(bullet)
 
                     if alien in self.aliens:
-                        self.aliens.remove(alien)
+                        x = alien.rect.x
+                        y = alien.rect.y
 
+                        self.aliens.remove(alien)
+                        self._create_explosions(x, y)
+    
+    def _create_explosions(self, x, y):
+        explosion = Explosions(self, x, y)
+        self.explosions.append(explosion)
+
+    def _update_explosions(self):
+        for explosion in self.explosions[:]:
+            if explosion.is_expired():
+                explosion.draw()
+            else:
+                self.explosions.remove(explosion)
+    
     def _create_alien(self):
-        if pygame.time.get_ticks() - self.last_alien_shot < 1000:
+        if pygame.time.get_ticks() - self.last_alien_shot < 800:
             return
 
-        for i in range(randrange(1, 10)):
+        for _ in range(randrange(5, 10)):
             alien = Alien(self)
             alien.rect.x = randrange(200, self.setting.width - 200)
 
-            # self.alien_x.append(alien.rect.x)
-            self.aliens.append(alien)
-
+            if not any(alien.rect.colliderect(a) for a in self.aliens):
+                self.aliens.append(alien)
     
     def _fire_bullets(self):
         for bullet in self.ship_bullets[:]:
@@ -101,6 +116,11 @@ class AlienInvasion:
             if bullet.rect.y < 0:
                 self.ship_bullets.remove(bullet)
 
+    def _update_alien(self):
+        if self.aliens:
+            for alien in self.aliens:
+                alien.blit_alien()
+    
     def _alien_fire_bullets(self):
         if pygame.time.get_ticks() - self.last_alien_shot < 1000:
             return
@@ -121,17 +141,18 @@ class AlienInvasion:
     def _update_screen(self):
         self.screen.fill(self.setting.bg_color)
         self.screen.blit(self.bg)
-        self._alien_fire_bullets()
-        self._fire_bullets()
+
         self.ship.blitme()
+        self._fire_bullets()
+
+        self._update_alien()
+        self._alien_fire_bullets()
         self._alien_draw_bullet()
+
+        self._update_explosions()
 
         if self.defeat:
             self.screen.blit(self.text, (self.setting.width / 3, self.setting.height / 2))
-
-        if self.aliens:
-            for alien in self.aliens:
-                alien.blit_alien()
 
         pygame.display.flip()
 
