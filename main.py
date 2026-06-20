@@ -28,12 +28,18 @@ class AlienInvasion:
         self.score = 0
         self.font = pygame.font.Font("Font/TrueType (.ttf)/PixeloidMono.ttf", 200)
         self.font_s = pygame.font.Font("Font/TrueType (.ttf)/PixeloidMono.ttf", 36)
-        
+        self.font_start = pygame.font.Font("Font/TrueType (.ttf)/PixeloidMono.ttf", 150)
+
+        self.start_text = self.font_start.render("TO START\nPRESS 'R'", True, (255, 255, 255))
+        self.start_text_rect = self.start_text.get_rect()
+        self.start_text_rect.center = self.screen_rect.center
+    
         self.deafeat_text = self.font.render("game over".upper(), True, (255, 255, 255))
         self.deafeat_text_rect = self.deafeat_text.get_rect()
         self.deafeat_text_rect.center = self.screen_rect.center
 
         self.defeat = False
+        self.start = False
         self.running = True
 
         self.ship_bullets = []
@@ -65,6 +71,8 @@ class AlienInvasion:
         if event.key == pygame.K_s: self.ship.moving["down"] = True
         if event.key == pygame.K_a: self.ship.moving["left"] = True
         if event.key == pygame.K_d: self.ship.moving["right"] = True
+
+        if event.key == pygame.K_r: self.start = True
 
         if event.key == pygame.K_SPACE:
             self.ship_bullets.append(Bullet(self, "left"))
@@ -168,38 +176,41 @@ class AlienInvasion:
         self.check_aliens_bottom()
 
 
-    def _draw_defeat_screen(self):
-        if self.defeat:
-            self.screen.blit()
-
     def _draw_text(self):
-        self.score_text = self.font_s.render(f"SCORE: {self.score}", False, (255, 255, 255))
-        self.score_text_rect = self.score_text.get_rect()
-        self.score_text_rect.topleft = self.screen_rect.topleft
-        
-        self.screen.blit(self.score_text, self.score_text_rect)
+        if not self.start:
+            self.screen.blit(self.start_text, self.start_text_rect)
 
-        if self.defeat:
-            self.screen.blit(self.deafeat_text, self.deafeat_text_rect)
+        else:
+            self.score_text = self.font_s.render(f"SCORE: {self.score}", False, (255, 255, 255))
+            self.score_text_rect = self.score_text.get_rect()
+            self.score_text_rect.topleft = self.screen_rect.topleft
+            
+            self.screen.blit(self.score_text, self.score_text_rect)
+
+            if self.defeat:
+                self.screen.blit(self.deafeat_text, self.deafeat_text_rect)
+        
+        
         
         
     def _update_screen(self):
         # self.screen.fill(self.setting.bg_color)
         self.screen.blit(self.bg)
-
         self._draw_text()
-        self._fire_bullets()
 
-        self._alien_fire_bullets()
-        self._alien_draw_bullet()
-        self._update_alien()
+        if self.start:
+            self._fire_bullets()
 
-        self._update_explosions()
+            self._alien_fire_bullets()
+            self._alien_draw_bullet()
+            self._update_alien()
 
-        if not self.defeat:
-            self.ship.blitme()
-        else:
-            self.screen.blit(self.deafeat_text, self.deafeat_text_rect)
+            self._update_explosions()
+
+            if not self.defeat:
+                self.ship.blitme()
+            else:
+                self.screen.blit(self.deafeat_text, self.deafeat_text_rect)
 
         pygame.display.flip()
 
@@ -207,13 +218,15 @@ class AlienInvasion:
         while self.running:
             self._update_screen()
             self._check_events()
-            self._create_alien()
 
-            if not self.defeat:
-                self.ship.move()
-                self._check_defeat()
-                self._alien_fire_bullets()
-                self._check_alien_hit()
+            if self.start:
+                self._create_alien()
+
+                if not self.defeat:
+                    self.ship.move()
+                    self._check_defeat()
+                    self._alien_fire_bullets()
+                    self._check_alien_hit()
 
             self.clock.tick(self.setting.fps)
 
@@ -223,8 +236,8 @@ if __name__ == "__main__":
         1150,           # Высота
         60,             # FPS
         (75, 15, 25),   # bg(Не нужен, может стоять любой)
-        10,             # Скорость коробля
-        15              # Скорость Пуль для коробля
+        12,             # Скорость коробля
+        20              # Скорость Пуль для коробля
     )
 
     game.run()
