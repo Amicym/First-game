@@ -73,6 +73,8 @@ class AlienInvasion:
         if event.key == pygame.K_a: self.ship.moving["left"] = True
         if event.key == pygame.K_d: self.ship.moving["right"] = True
 
+        if event.key == pygame.K_q: sys.exit()
+
         if event.key == pygame.K_r:
             self.start = True
             self.defeat = False
