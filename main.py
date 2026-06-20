@@ -14,12 +14,12 @@ class AlienInvasion:
         self.clock = pygame.time.Clock()
         self.setting = Setting(height, width, fps, bg_color, ship_speed, bullets_speed)
 
-        self.screen = pygame.display.set_mode(self.setting.get_screen_setting())
-        self.screen_rect = self.screen.get_rect()
+        # self.screen = pygame.display.set_mode(self.setting.get_screen_setting())
 
-        # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        # self.setting.width = self.screen.get_rect().width - Полный экран
-        # self.setting.height = self.screen.get_rect().height
+        self.screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
+        self.setting.width = self.screen.get_rect().width 
+        self.setting.height = self.screen.get_rect().height
+        self.screen_rect = self.screen.get_rect()
 
         self.ship = Ship(self)
         self.aliens = []
