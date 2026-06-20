@@ -34,7 +34,7 @@ class AlienInvasion:
         self.start_text_rect = self.start_text.get_rect()
         self.start_text_rect.center = self.screen_rect.center
     
-        self.deafeat_text = self.font.render("game over".upper(), True, (255, 255, 255))
+        self.deafeat_text = self.font.render("game over\n   'r'".upper(), True, (255, 255, 255))
         self.deafeat_text_rect = self.deafeat_text.get_rect()
         self.deafeat_text_rect.center = self.screen_rect.center
 
@@ -53,6 +53,7 @@ class AlienInvasion:
         self.bg_rect = self.bg.get_rect()
 
         pygame.display.set_caption("Alien Invasion")
+        pygame.display.set_icon(pygame.image.load("Images/alien.png"))
 
     def _check_events(self):
         for event in pygame.event.get():
@@ -72,7 +73,14 @@ class AlienInvasion:
         if event.key == pygame.K_a: self.ship.moving["left"] = True
         if event.key == pygame.K_d: self.ship.moving["right"] = True
 
-        if event.key == pygame.K_r: self.start = True
+        if event.key == pygame.K_r:
+            self.start = True
+            self.defeat = False
+            self.score = 0
+            self.aliens.clear()
+            self.alien_bullets.clear()
+            self.ship.rect.midbottom = self.screen_rect.midbottom
+
 
         if event.key == pygame.K_SPACE:
             self.ship_bullets.append(Bullet(self, "left"))
